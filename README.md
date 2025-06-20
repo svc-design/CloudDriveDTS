@@ -7,6 +7,10 @@ for one-way synchronization from a local directory to Google Drive and is
 planned to evolve into a multi-cloud, bidirectional solution with a web-based
 management interface.
 
+Credentials entered during `cloudvault login` are encrypted using AES-256 with
+an encryption key supplied interactively. The resulting encrypted blob is stored
+under `~/.cloudvault/<provider>/<region>/credentials.json`.
+
 To build the CLI from source run:
 
 ```bash
