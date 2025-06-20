@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"cloudvault/utils"
 	"golang.org/x/term"
 )
 
@@ -67,6 +68,11 @@ func loginCmd(args []string) {
 	fmt.Println()
 	otp := strings.TrimSpace(string(otpBytes))
 
+	fmt.Print("Encryption key: ")
+	keyBytes, _ := term.ReadPassword(int(os.Stdin.Fd()))
+	fmt.Println()
+	encKey := strings.TrimSpace(string(keyBytes))
+
 	cred := Credentials{Username: username, Password: password, OTP: otp}
 	base := filepath.Join(os.Getenv("HOME"), ".cloudvault", provider, *region)
 	os.MkdirAll(base, 0o700)
@@ -77,7 +83,18 @@ func loginCmd(args []string) {
 		os.Exit(1)
 	}
 	defer f.Close()
-	if err := json.NewEncoder(f).Encode(cred); err != nil {
+
+	data, err := json.Marshal(cred)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to encode credentials: %v\n", err)
+		os.Exit(1)
+	}
+	enc, err := utils.Encrypt(data, encKey)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to encrypt credentials: %v\n", err)
+		os.Exit(1)
+	}
+	if _, err := f.Write([]byte(enc)); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to write credentials: %v\n", err)
 		os.Exit(1)
 	}
