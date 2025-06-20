@@ -8,7 +8,7 @@ agnostic of any specific API implementation.
 ## Project Layout
 
 ```
-cmd/         - entry point for the CLI
+cmd/         - entry point for the CLI (implemented in Go)
 adapters/    - provider adapters (e.g. gdrive.go, dropbox.go)
 engine/      - core sync logic and conflict resolution
 watcher/     - cross-platform filesystem watching
@@ -44,16 +44,17 @@ webui/       - optional web management interface
 
 - Encrypt all cloud provider access tokens locally (e.g. AES‑256 with
 a password-derived key).
-- Use a private `.cloudweaver/` directory for storing credentials and sync
-  state.
+- Use a private `.cloudvault/` directory for storing credentials and sync state.
 - Support a `.syncignore` file to exclude paths from synchronization.
+- Run `cloudvault login icloud --region <region>` to authenticate via an
+  interactive prompt that stores encrypted credentials locally.
 
 ## Example Commands
 
 ```
-cloudweaver auth icloud --region cn
-cloudweaver auth icloud --region global
-cloudweaver sync --src icloud/cn --dst icloud/global
-cloudweaver daemon --config ./sync.yaml
+cloudvault login icloud --region cn
+cloudvault login icloud --region global
+cloudvault sync --src icloud/cn --dst icloud/global
+cloudvault daemon --config ./sync.yaml
 ```
 
