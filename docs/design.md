@@ -1,20 +1,32 @@
-# CloudVault Design Document
+# CloudDriveDTS Design Document
 
-CloudVault is a command-line tool and optional web UI for synchronizing files
-across multiple cloud storage providers. The project is structured to make it
-simple to extend support for new providers while keeping the core sync engine
-agnostic of any specific API implementation.
+CloudDriveDTS is a command-line tool with an optional web UI for synchronizing
+files across multiple cloud storage providers. The architecture is designed to
+be provider agnostic so new adapters can be added with minimal effort.
+
+**Slogan:** "CloudDriveDTS — Own your cloud. Sync your way."
+
+## Features
+
+- OAuth-based authentication for various cloud drives
+- Bidirectional sync between local directories and remote clouds
+- Conflict resolution based on timestamps, hashes or manual selection
+- Real-time watchers with optional cron-like schedulers
+- AES-encrypted storage of configuration files and tokens
+- Plugin system for extending to WebDAV, S3, iCloud and more
+- Command-line interface with an optional web dashboard
 
 ## Project Layout
 
 ```
 cmd/         - entry point for the CLI (implemented in Go)
-adapters/    - provider adapters (e.g. gdrive.go, dropbox.go)
+adapter/     - provider adapters (e.g. gdrive.go, dropbox.go)
 engine/      - core sync logic and conflict resolution
 watcher/     - cross-platform filesystem watching
 config/      - configuration loading and saving
 store/       - persistent metadata (SQLite)
-utils/       - helpers for encryption, logging and I/O
+crypto/      - AES encryption utilities
+utils/       - helper functions
 webui/       - optional web management interface
 ```
 
@@ -44,17 +56,18 @@ webui/       - optional web management interface
 
 - Encrypt all cloud provider access tokens locally (e.g. AES‑256 with
 a password-derived key).
-- Use a private `.cloudvault/` directory for storing credentials and sync state.
+- Use a private `.clouddrivedts/` directory for storing credentials and sync state.
 - Support a `.syncignore` file to exclude paths from synchronization.
-- Run `cloudvault login icloud --region <region>` to authenticate via an
+- Run `clouddrivedts auth icloud --region <region>` to authenticate via an
   interactive prompt that stores encrypted credentials locally.
 
 ## Example Commands
 
 ```
-cloudvault login icloud --region cn
-cloudvault login icloud --region global
-cloudvault sync --src icloud/cn --dst icloud/global
-cloudvault daemon --config ./sync.yaml
+clouddrivedts auth gdrive
+clouddrivedts auth onedrive
+clouddrivedts sync --src ~/Projects --dst gdrive:/Backups --bi-sync
+clouddrivedts run --daemon
+clouddrivedts status
 ```
 
